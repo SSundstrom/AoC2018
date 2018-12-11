@@ -1,6 +1,6 @@
 package days
 import input.*
-import Aux.*
+import util.*
 
 fun day10(pt: Int): String {
     val res = solveProblem()

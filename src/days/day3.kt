@@ -1,6 +1,6 @@
 package days
 import input.*
-import Aux.*
+import util.*
 
 fun day3(pt: Int): String {
     val sheets = formatInput()

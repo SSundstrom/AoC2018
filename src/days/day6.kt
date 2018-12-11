@@ -1,7 +1,7 @@
 package days
 import input.*
 import kotlin.math.abs
-import Aux.*
+import util.*
 
 fun day6(pt: Int): String {
     when (pt) {

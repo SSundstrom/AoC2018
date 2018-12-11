@@ -1,5 +1,5 @@
 package days
-import Aux.Pos
+import util.Pos
 import kotlin.math.max
 
 fun day11(pt: Int): String {

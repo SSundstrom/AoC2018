@@ -1,4 +1,4 @@
-package Aux
+package util
 
 enum class Direction {
     NORTH, SOUTH, WEST, EAST
