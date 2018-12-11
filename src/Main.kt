@@ -4,23 +4,23 @@ import java.time.LocalDateTime
 
 
 fun main(args: Array<String>) {
-    if (true) {
+    if (false) {
         runAll()
     } else {
         runLatest()
     }
 }
 
-fun runLatest(): Unit {
+fun runLatest() {
     val day = LocalDateTime.now().dayOfMonth
     runDayTimed(day)
 }
 
-fun runAll(): Unit {
+fun runAll() {
     (1..LocalDateTime.now().dayOfMonth).forEach { runDayTimed(it) }
 }
 
-fun runDayTimed(day : Int) : Unit {
+fun runDayTimed(day : Int) {
     var res = ""
     val time = measureTimeMillis { res = runDayPt(day, 0) }
     println("Day " + day.toString() + " done in " + time.toString() + "ms")
@@ -39,8 +39,8 @@ fun runDayPt(day: Int, part : Int?): String {
         7 -> day7(pt)
         8 -> day8(pt)
         9 -> day9(pt)
-        10 -> day10(pt)/*
-        11 -> day11()
+        10 -> day10(pt)
+        11 -> day11(pt) /*
         12 -> day12()
         13 -> day13()
         14 -> day14()
