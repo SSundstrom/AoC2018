@@ -3,52 +3,45 @@ import util.Pos
 import kotlin.math.max
 
 fun day11(pt: Int): String {
+    val powerGrid = createPowerGrid()
     when (pt) {
-        1 -> return pt1()
-        2 -> return pt2()
+        1 -> return pt1(powerGrid)
+        2 -> return pt2(powerGrid)
     }
-    return pt1() + "\t" + pt2()
+    return pt1(powerGrid) + "\t" + pt2(powerGrid)
 }
 
-private fun pt1() : String {
-    val powerGrid = mutableMapOf<Pos, Int>()
-    (1..300).forEach { x ->
-        (1..300).forEach { y ->
-            powerGrid.put(Pos(x, y), calcPowerLevel(x, y))
-        }
-    }
-    (1..(300-2)).forEach { x ->
-        (1..(300-2)).forEach { y ->
-            val curr = Pos(x, y)
-            powerGrid.put(curr, sumSquare(curr, powerGrid))
-        }
-    }
-    val bestSquarePos = powerGrid.toList().maxBy { it.second }?.first?:Pos(-1, -1)
-    return "Pt1: " + bestSquarePos.toString()
+private fun pt1(powerGrid: Map<Pos, IntArray>) : String {
+    val pair = powerGrid.maxBy { it.value[0] }
+    val pos = pair?.key?.move(1,1)
+    return "Pt1: " + pos.toString()
 }
 
-private fun pt2() : String {
-    val powerGrid = mutableMapOf<Pos, IntArray>()
+private fun pt2(powerGrid: Map<Pos, IntArray>) : String {
+    val a = powerGrid.maxBy { it.value.max()?:Int.MIN_VALUE }
+    val array = a?.value?: intArrayOf()
+    var maxIndex = -1
     var max = 0
-    var posIndex = Pair(Pos(0,0), 0)
+    array.forEachIndexed { index, value ->
+        if (value > max) {maxIndex = index; max = value}
+    }
+    return "Pt2: Pos: " + a?.key.toString() + " Index:" + maxIndex.toString()
+}
+
+private fun createPowerGrid() : Map<Pos, IntArray> {
+    val powerGrid = mutableMapOf<Pos, IntArray>()
     for (x in (299 downTo 0)) {
         for (y in (299 downTo 0)) {
-            val tmp = calcPowerLevelPt2(x, y, powerGrid)
-            val tmpScore = powerGrid[tmp.first]?.get(tmp.second)?: Int.MIN_VALUE
-            if ( tmpScore > max ) {
-                max = tmpScore
-                posIndex = tmp
-            }
+            fillPowerGrid(x, y, powerGrid)
         }
     }
-    println(powerGrid[posIndex.first]?.get(posIndex.second))
-    return "Pt2: Pos: " + posIndex.first.move(1,1).toString() + " Index:" + posIndex.second.inc().toString()
+    return powerGrid.toMap()
 }
 
 private fun calcPowerLevel(x : Int, y : Int): Int {
     val serial = 3031
-    val rackID = x + 10
-    var powerLevel = rackID * y
+    val rackID = x.inc() + 10
+    var powerLevel = rackID * y.inc()
     powerLevel += serial
     powerLevel *= rackID
     powerLevel = (powerLevel/100) % 10
@@ -56,17 +49,7 @@ private fun calcPowerLevel(x : Int, y : Int): Int {
     return powerLevel
 }
 
-private fun sumSquare(topLeft : Pos, powerGrid : Map<Pos, Int>) : Int {
-    var sum = 0
-    (0..2).forEach { x ->
-        (0..2).forEach { y ->
-            sum += powerGrid.getOrDefault(topLeft.move(x, y), 0)
-        }
-    }
-    return sum
-}
-
-private fun calcPowerLevelPt2(x : Int, y : Int, powerGrid: MutableMap<Pos, IntArray>) : Pair<Pos, Int> {
+private fun fillPowerGrid(x : Int, y : Int, powerGrid: MutableMap<Pos, IntArray>) {
     val powerLevels = IntArray(300-max(x,y))
     powerLevels[0] = calcPowerLevel(x+1, y+1)
     val pos = Pos(x, y)
@@ -84,7 +67,6 @@ private fun calcPowerLevelPt2(x : Int, y : Int, powerGrid: MutableMap<Pos, IntAr
         }
     }
     powerGrid.put(Pos(x, y), powerLevels)
-    return Pair(pos, maxIndex)
 }
 
 private fun sumAnySquare(topLeft: Pos, offset : Int, powerGrid: Map<Pos, IntArray>) : Int {

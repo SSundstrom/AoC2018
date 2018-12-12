@@ -4,11 +4,28 @@ import java.time.LocalDateTime
 
 
 fun main(args: Array<String>) {
+
     if (false) {
         runAll()
     } else {
         runLatest()
     }
+}
+
+fun t1() {
+    var t1 = 0.toLong()
+    var t2 = 0.toLong()
+    val index = 5
+    for (i in 10 .. 20000 ) {
+        t1 += measureTimeMillis {
+            BooleanArray(500, {false}).any()
+        }
+        t2 += measureTimeMillis {
+            val a = BooleanArray(500)
+            a.any()
+        }
+    }
+    println("$t1 t1\n$t2 t2")
 }
 
 fun runLatest() {
@@ -40,8 +57,8 @@ fun runDayPt(day: Int, part : Int?): String {
         8 -> day8(pt)
         9 -> day9(pt)
         10 -> day10(pt)
-        11 -> day11(pt) /*
-        12 -> day12()
+        11 -> day11(pt)
+        12 -> day12(pt)/*
         13 -> day13()
         14 -> day14()
         15 -> day15()

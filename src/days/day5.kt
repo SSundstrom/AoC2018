@@ -23,7 +23,7 @@ private fun pt2() : String {
         while (filtered.removeCollisions()) {}
         return@map Pair(letter, filtered.size)
     }
-    return reductions.minBy { it.second }?.second.toString()
+    return "Pt2: " + reductions.minBy { it.second }?.second.toString()
 }
 
 fun MutableList<Char>.removeCollisions() : Boolean {

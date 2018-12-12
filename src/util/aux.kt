@@ -18,7 +18,7 @@ class Pos constructor(val x : Int, val y : Int) {
     }
 
     override fun hashCode(): Int {
-        return x * 11 + y * 31
+        return x * 883 + y * 919
     }
 
     fun move(x: Int, y: Int): Pos {

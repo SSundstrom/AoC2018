@@ -62,7 +62,3 @@ private fun collectMetaPt2(list : List<Int>) : Pair<Int, List<Int>> {
 
     return Pair(metaSum, updatedList.drop(metaPoints))
 }
-
-
-
-class Node constructor(val id: Int, val children : Int, val meta : Int)
