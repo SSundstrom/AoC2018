@@ -1,14 +1,19 @@
 import days.*
 import kotlin.system.measureTimeMillis
 import java.time.LocalDateTime
+import tests.*
 
 
 fun main(args: Array<String>) {
 
     if (false) {
-        runAll()
+        listInlistEq()
     } else {
-        runLatest()
+        if (true) {
+            runAll()
+        } else {
+            runLatest()
+        }
     }
 }
 
@@ -34,7 +39,8 @@ fun runLatest() {
 }
 
 fun runAll() {
-    (1..LocalDateTime.now().dayOfMonth).forEach { runDayTimed(it) }
+    // (1..LocalDateTime.now().dayOfMonth).forEach { runDayTimed(it) }
+    (1..14).forEach { runDayTimed(it) }
 }
 
 fun runDayTimed(day : Int) {
@@ -58,9 +64,9 @@ fun runDayPt(day: Int, part : Int?): String {
         9 -> day9(pt)
         10 -> day10(pt)
         11 -> day11(pt)
-        12 -> day12(pt)/*
-        13 -> day13()
-        14 -> day14()
+        12 -> day12(pt)
+        13 -> day13(pt)
+        14 -> day14(pt) /*
         15 -> day15()
         16 -> day16()
         17 -> day17()

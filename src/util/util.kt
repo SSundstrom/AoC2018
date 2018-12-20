@@ -4,6 +4,25 @@ enum class Direction {
     NORTH, SOUTH, WEST, EAST
 }
 
+fun Direction.left() : Direction {
+    return when (this) {
+        Direction.NORTH -> Direction.WEST
+        Direction.WEST -> Direction.SOUTH
+        Direction.SOUTH -> Direction.EAST
+        Direction.EAST -> Direction.NORTH
+    }
+}
+
+fun Direction.right() : Direction {
+    return when (this) {
+        Direction.NORTH -> Direction.EAST
+        Direction.EAST -> Direction.SOUTH
+        Direction.SOUTH -> Direction.WEST
+        Direction.WEST -> Direction.NORTH
+
+    }
+}
+
 class Pos constructor(val x : Int, val y : Int) {
     override fun toString(): String {
         return "(" + this.x.toString() + ", " + this.y.toString() + ")"
