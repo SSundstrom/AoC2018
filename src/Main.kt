@@ -9,7 +9,7 @@ fun main(args: Array<String>) {
     if (false) {
         listInlistEq()
     } else {
-        if (true) {
+        if (false) {
             runAll()
         } else {
             runLatest()
@@ -35,7 +35,7 @@ fun t1() {
 
 fun runLatest() {
     val day = LocalDateTime.now().dayOfMonth
-    runDayTimed(day)
+    runDayTimed(15)
 }
 
 fun runAll() {
@@ -66,8 +66,8 @@ fun runDayPt(day: Int, part : Int?): String {
         11 -> day11(pt)
         12 -> day12(pt)
         13 -> day13(pt)
-        14 -> day14(pt) /*
-        15 -> day15()
+        14 -> day14(pt)
+        15 -> day15(pt) /*
         16 -> day16()
         17 -> day17()
         18 -> day18()
