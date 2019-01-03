@@ -6,7 +6,7 @@ fun day(pt: Int): String {
         1 -> return pt1()
         2 -> return pt2()
     }
-    return pt1() + "\t" + pt2()
+    return pt1().padEnd(40) + pt2()
 }
 
 private fun pt1() : String {

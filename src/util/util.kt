@@ -60,5 +60,68 @@ class Pos constructor(val x : Int, val y : Int) : Comparable<Pos> {
             else -> Pos(x, y)
         }
     }
+}
 
+fun <E> MutableList<E>.pop() : E {
+    val a = this.first()
+    this.removeAt(0)
+    return a
+}
+
+class Array2D<T> (val xSize: Int, val ySize: Int, val array: Array<Array<T>>) {
+
+    companion object {
+
+        inline operator fun <reified T> invoke() = Array2D(0, 0, Array(0) { emptyArray<T>() })
+
+        inline operator fun <reified T> invoke(xWidth: Int, yWidth: Int) =
+                Array2D(xWidth, yWidth, Array(xWidth) { arrayOfNulls<T>(yWidth) })
+
+        inline operator fun <reified T> invoke(xWidth: Int, yWidth: Int, default : T) =
+                Array2D(xWidth, yWidth, Array(xWidth) { Array(yWidth) {default} })
+
+        inline operator fun <reified T> invoke(xWidth: Int, yWidth: Int, operator: (Int, Int) -> (T)): Array2D<T> {
+            val array = Array(xWidth) { x ->
+                Array(yWidth) {y -> operator(x, y)}
+            }
+            return Array2D(xWidth, yWidth, array)
+        }
+    }
+
+    operator fun get(pos: Pos): T {
+        return get(pos.x, pos.y)
+    }
+
+    operator fun get(x: Int, y: Int): T {
+        return array[x][y]
+    }
+
+    operator fun set(x: Int, y: Int, t: T) {
+        array[x][y] = t
+    }
+
+    operator fun set(pos: Pos, t: T) {
+        set(pos.x, pos.y, t)
+    }
+
+
+    inline fun forEach(operation: (T) -> Unit) {
+        array.forEach { it.forEach { operation.invoke(it) } }
+    }
+
+    inline fun forEachIndexed(operation: (x: Int, y: Int, T) -> Unit) {
+        array.forEachIndexed { x, p -> p.forEachIndexed { y, t -> operation.invoke(x, y, t) } }
+    }
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        for (y in 0 until ySize) {
+            sb.append(y); sb.append(": ")
+            for (x in 0 until xSize) {
+                sb.append(array[x][y])
+            }
+            sb.append('\n')
+        }
+        return sb.toString()
+    }
 }

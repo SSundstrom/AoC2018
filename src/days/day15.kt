@@ -3,10 +3,11 @@ import input.*
 import util.Pos
 import java.util.*
 import kotlin.Comparator
+import kotlin.math.abs
 import util.Direction as D
 
 fun day15(pt: Int): String {
-    when (1) {
+    when (2) {
         1 -> return pt1()
         2 -> return pt2()
     }
@@ -19,124 +20,166 @@ private fun pt1() : String {
     val field = Board(input.first().length, input.size)
     input.forEachIndexed { y, line ->
         line.forEachIndexed { x, c ->
-            field.populate(c, Pos(x, y))
+            field.populate(c, Pos(x, y), 3)
         }
     }
-    println(field)
     // Round
     var round = 0
     while (field.bothTeamsAlive()) {
         // Setup?
-
         val sortedSoldiers = field.getTurnOrder()
         var completedRound = true
         // Step
         for (i in 0 until sortedSoldiers.size) {
             // Actions for each soldier
-            val soldier = sortedSoldiers[i]
-            if (soldier.isDead()) continue
-            val opponents = field.getOpponents(soldier.team)
-            if (opponents.isEmpty()) { completedRound = false; break }
-            soldier.move(field)
-            val target = soldier.findTarget(opponents)
-            target?.takeDamage(soldier.attack)
-            if (target?.isDead() == true) field.remove(target)
+            completedRound = takeTurn(sortedSoldiers[i], field)
         }
         if (completedRound) round++
-//        println("$round : ")
-//        println(field)
-//        sortedSoldiers.forEach { print("${it.team.toString().first()}${it.health}, ") }
-//        println()
     }
-
-    println("".padEnd(20, '-'))
-    println(field)
     var hpLeft = 0
-    field.elfs.forEach { hpLeft += it.health; print(" E${it.health}") }
-    field.goblins.forEach { hpLeft += it.health; print(" G${it.health}") }
-    println(" = $hpLeft with round $round completed")
-
+    field.goblins.union(field.elfs).forEach { hpLeft += it.health }
+//    println("$hpLeft with round $round completed")
     return (hpLeft * round).toString()
 }
 
 private fun pt2() : String {
-    return "unimplemented"
+    // Init
+    val input = getInput(15).lines()
+    var power = 100
+    var offset = 0
+    var res : Pair<Int, Int>
+    while (power > 1) {
+        res = runWith(power, offset, input)
+        offset += (res.first-1)*power
+        power /= 2
+        println("----\noffset:$offset")
+    }
+    res = runWith(1, offset, input)
+    return res.second.toString()
 }
 
-private class Soldier constructor(var pos : Pos, val team : T) : Comparable<Soldier> {
+private fun runWith(power : Int, offset : Int, input : List<String>) : Pair<Int, Int> {
+    var hpLeft = 0
+    var round = 0
+    var anElfDied = true
+    var str = 0
+    while (anElfDied) {
+        str++
+        println(str*power + offset)
+        val field = Board(input.first().length, input.size)
+        input.forEachIndexed { y, line ->
+            line.forEachIndexed { x, c ->
+                field.populate(c, Pos(x, y), str*power + offset)
+            }
+        }
+        // Round
+        round = 0
+        val elfCount = field.elfs.size
+        while (field.bothTeamsAlive() && elfCount == field.elfs.size) {
+            // Setup?
+            val sortedSoldiers = field.getTurnOrder()
+            var completedRound = true
+            // Step
+            for (i in 0 until sortedSoldiers.size) {
+                // Actions for each soldier
+                completedRound = takeTurn(sortedSoldiers[i], field)
+            }
+            if (completedRound) round++
+        }
+        anElfDied = elfCount != field.elfs.size
+        hpLeft = 0
+        field.goblins.union(field.elfs).forEach { hpLeft += it.health }
+    }
+    return Pair(str, hpLeft * round)
+}
+
+private fun takeTurn( soldier : Soldier,  field: Board) : Boolean {
+    if (soldier.isDead()) return true
+    val opponents = field.getOpponents(soldier.team)
+    if (opponents.isEmpty()) { return false }
+    soldier.move(field)
+    val target = soldier.findTarget(opponents)
+    target?.takeDamage(soldier.attack)
+    if (target?.isDead() == true) field.remove(target)
+    return true
+}
+
+private class Soldier constructor(var pos : Pos, val team : T, val attack : Int) : Comparable<Soldier> {
+    constructor(pos : Pos, team : T) : this(pos, team, 3)
+
     override fun compareTo(other: Soldier): Int {
         return pos.compareTo(other.pos) //To change body of created functions use File | Settings | File Templates.
     }
 
     var health = 200
-    val attack = 3
 
     fun takeDamage(damage : Int) {
         this.health -= damage
     }
 
     fun move(field : Board ) {
-//        if (pos.y == 8) {
-//            print("-")
-//        }
         val opponents = field.getOpponents(team)
         val obstacles = field.getObstacles()
         if (inRange(opponents).isNotEmpty()) return
-        val nextToOpponent = mutableListOf<Pos>()
+        val inRange = mutableListOf<Pos>()
         opponents.forEach { op ->
             op.getSurrounding().forEach { pos ->
-                nextToOpponent.add(pos) } }
-        val inRange = nextToOpponent.filter { it !in obstacles }
-
+                if (pos !in obstacles) inRange.add(pos) } }
+//        println("start path")
         val reachable = inRange.mapNotNull { pathTo(it, obstacles) }
+//        println("end path")
+        val shortestPathLength = reachable.map { it.size }.min()
+        val nearest = reachable
+                .filter { it.size == shortestPathLength }
+                .minBy { it.fold(pos) { curr, dir -> curr.move(dir)} }
 
-        val shortestPathLength = reachable.map { it.second.size }.min()
-        val nearest = reachable.filter { it.second.size == shortestPathLength }.minBy { it.first }
-
-        pos = pos.move(nearest?.first)
+        pos = pos.move(nearest?.first())
     }
 
-    fun pathTo(target : Pos, obstacles : List<Pos>) : Pair<D, List<D>>? {
-        val directions = listOf(D.NORTH, D.WEST, D.EAST, D.SOUTH) // This might be very important
-        val tup : List<Pair<D, List<D>>> = directions.mapNotNull { dir ->
-            val availablePos = PriorityQueue<Pos>(DistanceTo(target))
-            val solutions = mutableMapOf<Pos, List<D>>()
-            val startPos = pos.move(dir)
-            if (startPos in obstacles) { return@mapNotNull null }
-            availablePos.add(startPos)
-//            for (i in 0 until directions.size) {
-//                val step = startPos.move(directions[i])
-//                if (step !in obstacles) {
-//                    solutions[step] = listOf(directions[i])
-//                    availablePos.add(step)
-//                }
-//            }
-            while (availablePos.isNotEmpty()) {
-                val currPos = availablePos.poll()
-                val path = solutions[currPos] ?: emptyList()
-                if (target == currPos) return@mapNotNull Pair(dir, path)
-                directions.forEach { direction ->
-                    val newPos = currPos.move(direction)
-                    if (newPos !in obstacles) {
-                        val newPath = path.plus(direction)
-                        val oldPath = solutions[newPos]
-                        if (oldPath.isNullOrEmpty()) {
-                            // Pos has not been reachable before
-                            solutions[newPos] = newPath
-                            availablePos.add(newPos)
-                        } else {
-                            if (oldPath.size > newPath.size) {
-                                // The new path is shorter
-                                solutions[newPos] = newPath
-                            }
+    fun pathTo(target : Pos, obstacles : List<Pos>) : List<D>? {
+        val directions = listOf(D.NORTH, D.WEST, D.EAST, D.SOUTH)
+        val possibleMoves = PriorityQueue<Pos>(DistanceTo(target))
+        val paths = mutableMapOf<Pos, List<D>>()
+        var minPathDist = Int.MAX_VALUE
+        directions.forEach {
+            if (pos.move(it) !in obstacles) {
+                paths[pos.move(it)] = listOf(it)
+                possibleMoves.add(pos.move(it))
+            }
+        }
+//        var counter = 0
+        while (possibleMoves.isNotEmpty()) {
+//            counter++
+//            print("$counter-")
+            val curr = possibleMoves.poll()
+            val pathToCurr = paths[curr]?: error("There is no path to $curr")
+            directions.forEach {
+                val newPos = curr.move(it)
+                if (newPos !in obstacles
+                        && pathToCurr.size + 1 <= minPathDist ) {
+                    val newPath = pathToCurr.plus(it)
+                    val oldPath = paths[newPos]
+                    if (oldPath == null || oldPath.size >= newPath.size) {
+                        when {
+                            oldPath == null -> {
+                                paths[newPos] = newPath
+                                possibleMoves.add(newPos) }
+                            oldPath.size > newPath.size -> {
+                                paths[newPos] = newPath
+                                possibleMoves.add(newPos) }
+                            oldPath.first() > newPath.first() -> {
+                                paths[newPos] = newPath
+                                possibleMoves.add(newPos) }
                         }
+                    }
+                    if (newPos == target) {
+                        minPathDist = newPath.size
                     }
                 }
             }
-            return@mapNotNull null
         }
-        val shortest = tup.minBy { it.second.size }
-        return tup.filter { it.second.size == shortest?.second?.size }.minBy { it.first }
+//        println()
+        return paths[target]
     }
 
     fun isDead() : Boolean {
@@ -144,11 +187,13 @@ private class Soldier constructor(var pos : Pos, val team : T) : Comparable<Sold
     }
 
     fun inRange(opponents: List<Soldier>) : List<Soldier> {
-        return opponents.filter { it.pos.distanceTo(this.pos) == 1 }
+        return opponents.filter { it.pos in getSurrounding() }
     }
 
     fun findTarget(opponents : List<Soldier>) : Soldier? {
-        return inRange(opponents).sortedBy { it.health }.firstOrNull()
+        val inRange = inRange(opponents)
+        val minHealth = inRange.map { it.health }.min()
+        return inRange.filter { it.health == minHealth }.minBy { it.pos }
     }
 
     fun getSurrounding() : List<Pos> {
@@ -205,10 +250,10 @@ private class Board constructor(val width : Int, val height : Int){
         return lines.joinToString("\n")
     }
 
-    fun populate (char : Char, pos : Pos) {
+    fun populate (char : Char, pos : Pos, str : Int) {
         when (char) {
             '#' -> walls.add(pos)
-            'E' -> elfs.add(Soldier(pos, T.Elf))
+            'E' -> elfs.add(Soldier(pos, T.Elf, str))
             'G' -> goblins.add(Soldier(pos, T.Goblin))
         }
     }
@@ -221,17 +266,17 @@ private class DistanceTo constructor(val target : Pos) : Comparator<Pos> {
         var distanceDiff = 0
         var naturalOrdering = 0
         if (o1 != null) {
-            distanceDiff -= o1.distanceTo(target)
+            distanceDiff += o1.distanceTo(target)
             naturalOrdering = -1
         }
         if (o2 != null) {
-            distanceDiff += o2.distanceTo(target)
+            distanceDiff -= o2.distanceTo(target)
             naturalOrdering = o1?.compareTo(o2)?:1
         }
         return if (distanceDiff == 0) {
             naturalOrdering
         } else {
-            distanceDiff
+            distanceDiff / abs(distanceDiff)
         }
 
     }

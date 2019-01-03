@@ -35,7 +35,7 @@ fun t1() {
 
 fun runLatest() {
     val day = LocalDateTime.now().dayOfMonth
-    runDayTimed(15)
+    runDayTimed(17)
 }
 
 fun runAll() {
@@ -67,9 +67,9 @@ fun runDayPt(day: Int, part : Int?): String {
         12 -> day12(pt)
         13 -> day13(pt)
         14 -> day14(pt)
-        15 -> day15(pt) /*
-        16 -> day16()
-        17 -> day17()
+        15 -> day15(pt)
+        16 -> day16(pt)
+        17 -> day17(pt) /*
         18 -> day18()
         19 -> day19()
         20 -> day20()
