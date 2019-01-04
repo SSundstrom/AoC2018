@@ -113,6 +113,14 @@ class Array2D<T> (val xSize: Int, val ySize: Int, val array: Array<Array<T>>) {
         array.forEachIndexed { x, p -> p.forEachIndexed { y, t -> operation.invoke(x, y, t) } }
     }
 
+    fun contains(x: Int, y: Int) : Boolean {
+        return (x >= 0 && y >= 0 && x < xSize && y < ySize)
+    }
+
+    fun contains(pos : Pos) : Boolean {
+        return this.contains(pos.x, pos.y)
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
         for (y in 0 until ySize) {
@@ -124,4 +132,23 @@ class Array2D<T> (val xSize: Int, val ySize: Int, val array: Array<Array<T>>) {
         }
         return sb.toString()
     }
+
+    override fun hashCode(): Int {
+        var hash = 0
+        forEachIndexed { x, y, t -> hash += x * 119 + y * 123 + t.hashCode() }
+        return hash
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is Array2D<*>) {
+            if (other.xSize == this.xSize && other.ySize == this.ySize) {
+                other.forEachIndexed { x, y, any ->
+                    if (this[x, y] != any) return false
+                }
+                return true
+            }
+        }
+        return false
+    }
+
 }

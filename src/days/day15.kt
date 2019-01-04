@@ -7,7 +7,7 @@ import kotlin.math.abs
 import util.Direction as D
 
 fun day15(pt: Int): String {
-    when (2) {
+    when (pt) {
         1 -> return pt1()
         2 -> return pt2()
     }
@@ -39,7 +39,7 @@ private fun pt1() : String {
     var hpLeft = 0
     field.goblins.union(field.elfs).forEach { hpLeft += it.health }
 //    println("$hpLeft with round $round completed")
-    return (hpLeft * round).toString()
+    return "Pt1: ${hpLeft * round}"
 }
 
 private fun pt2() : String {
@@ -52,10 +52,9 @@ private fun pt2() : String {
         res = runWith(power, offset, input)
         offset += (res.first-1)*power
         power /= 2
-        println("----\noffset:$offset")
     }
     res = runWith(1, offset, input)
-    return res.second.toString()
+    return "Pt2: ${res.second}"
 }
 
 private fun runWith(power : Int, offset : Int, input : List<String>) : Pair<Int, Int> {
@@ -65,7 +64,6 @@ private fun runWith(power : Int, offset : Int, input : List<String>) : Pair<Int,
     var str = 0
     while (anElfDied) {
         str++
-        println(str*power + offset)
         val field = Board(input.first().length, input.size)
         input.forEachIndexed { y, line ->
             line.forEachIndexed { x, c ->

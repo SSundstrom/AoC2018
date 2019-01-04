@@ -10,7 +10,8 @@ fun day4(pt: Int): String {
 }
 
 private fun pt1() : String {
-    return "unimplemented"
+    day41()
+    return ""
 }
 
 private fun pt2() : String {
